@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR-Code-Toolsetter</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#121823;
+      --panel2:#0f1622;
+      --line:rgba(255,255,255,.08);
+      --text:#e7edf6;
+      --muted:#9aa6b2;
+      --accent:#4da3ff;
+      --accent2:#77b7ff;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --shadow:0 20px 50px rgba(0,0,0,.35);
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      min-height:100vh;
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(77,163,255,.14) 0%, rgba(77,163,255,0) 55%),
+        radial-gradient(900px 500px at 100% 0%, rgba(119,183,255,.10) 0%, rgba(119,183,255,0) 45%),
+        linear-gradient(180deg,#0a0e14 0%, #0b0f14 100%);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
+      line-height:1.4;
+    }
+
+    .wrap{
+      max-width:1220px;
+      margin:0 auto;
+      padding:22px 16px 40px;
+    }
+
+    .hero{
+      display:flex;
+      flex-wrap:wrap;
+      gap:14px;
+      align-items:flex-start;
+      justify-content:space-between;
+      margin-bottom:18px;
+    }
+
+    .heroCard,
+    .panel{
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--line);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+    }
+
+    .heroCard{
+      width:100%;
+      padding:18px 18px 16px;
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:clamp(30px, 5vw, 46px);
+      letter-spacing:.2px;
+    }
+
+    .subtitle{
+      color:var(--muted);
+      font-size:15px;
+      max-width:860px;
+    }
+
+    .badgeRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:12px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border:1px solid var(--line);
+      padding:7px 12px;
+      border-radius:999px;
+      font-size:12px;
+      color:var(--muted);
+      background:rgba(255,255,255,.03);
+    }
+
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:0 0 18px;
+    }
+
+    button, select, input, textarea{
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 14px;
+      font:inherit;
+      width:100%;
+    }
+
+    button{
+      cursor:pointer;
+      width:auto;
+      min-height:44px;
+    }
+
+    button.primary{
+      background:linear-gradient(180deg, #2379ff, #1a5dda);
+      border-color:transparent;
+      color:white;
+      font-weight:600;
+    }
+
+    button.secondary{background:rgba(255,255,255,.04)}
+    button.ghost{background:transparent}
+
+    select option{background:#10151d;color:var(--text)}
+
+    .tabRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .tabBtn{
+      border-radius:999px;
+      padding:11px 16px;
+    }
+
+    .tabBtn.active{
+      background:linear-gradient(180deg, #2379ff, #1a5dda);
+      border-color:transparent;
+      color:white;
+      font-weight:700;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(12, minmax(0,1fr));
+      gap:16px;
+    }
+
+    .panel{
+      padding:16px;
+      min-width:0;
+    }
+
+    .col-4{grid-column:span 4}
+    .col-5{grid-column:span 5}
+    .col-6{grid-column:span 6}
+    .col-7{grid-column:span 7}
+    .col-8{grid-column:span 8}
+    .col-12{grid-column:span 12}
+
+    .panel h2,
+    .panel h3{
+      margin:0 0 12px;
+      font-size:20px;
+    }
+
+    .sectionTitle{
+      font-size:12px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      margin:0 0 10px;
+    }
+
+    .fieldGrid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+      min-width:0;
+    }
+
+    .field label{
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .field small{color:var(--muted)}
+
+    .field.full{grid-column:1/-1}
+
+    .resultCard{
+      padding:16px;
+      border-radius:18px;
+      border:1px solid rgba(77,163,255,.25);
+      background:linear-gradient(180deg, rgba(77,163,255,.14), rgba(77,163,255,.05));
+    }
+
+    .resultBig{
+      font-size:clamp(28px, 5vw, 44px);
+      font-weight:800;
+      letter-spacing:.4px;
+      margin:2px 0 4px;
+    }
+
+    .resultMini{
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .kv{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      margin-top:10px;
+    }
+
+    .miniBox{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      background:rgba(255,255,255,.03);
+    }
+
+    .miniBox .k{
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:6px;
+    }
+
+    .miniBox .v{
+      font-size:24px;
+      font-weight:700;
+    }
+
+    .hint{
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .formula{
+      font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size:13px;
+      line-height:1.55;
+      white-space:pre-wrap;
+      padding:14px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.18);
+      overflow:auto;
+    }
+
+    .warnBox, .okBox{
+      padding:12px 14px;
+      border-radius:14px;
+      font-size:14px;
+      margin-top:12px;
+    }
+
+    .warnBox{
+      border:1px solid rgba(245,158,11,.35);
+      background:rgba(245,158,11,.08);
+      color:#ffd495;
+    }
+
+    .okBox{
+      border:1px solid rgba(34,197,94,.35);
+      background:rgba(34,197,94,.08);
+      color:#b9f7cd;
+    }
+
+    .noteList{
+      margin:0;
+      padding-left:18px;
+      color:var(--muted);
+    }
+
+    .noteList li{margin:8px 0}
+
+    .hidden{display:none !important}
+
+    .footer{
+      margin-top:18px;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+    }
+
+    @media (max-width:980px){
+      .col-4,.col-5,.col-6,.col-7,.col-8{grid-column:span 12}
+    }
+
+    @media (max-width:700px){
+      .fieldGrid,.kv{grid-template-columns:1fr}
+      .heroCard{padding:16px}
+      .panel{padding:14px}
+      button{width:100%}
+      .toolbar{display:grid;grid-template-columns:1fr 1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div class="heroCard">
+        <h1>QR-Code-Toolsetter</h1>
+        <div class="subtitle">
+          Stand-alone Rechner für SolidPro und Drehwerkzeuge. Für Sternrevolver und Scheibenrevolver mit editierbaren Basiswerten, Voreinstellwerten und frei einstellbarer Lage. Alles läuft lokal im Browser und bleibt auf dem Gerät gespeichert.
+        </div>
+        <div class="badgeRow">
+          <span class="badge">QR-tauglich</span>
+          <span class="badge">ohne Server</span>
+          <span class="badge">lokale Speicherung</span>
+          <span class="badge">Stern / Scheibe</span>
+          <span class="badge">VDI-Mitte / Voreinstellung</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button id="saveStateBtn" class="secondary">Einstellungen lokal speichern</button>
+      <button id="resetStateBtn" class="ghost">Zurücksetzen</button>
+      <button id="copySummaryBtn" class="secondary">Zusammenfassung kopieren</button>
+      <button id="exportStateBtn" class="secondary">JSON exportieren</button>
+      <button id="importStateTriggerBtn" class="secondary">JSON importieren</button>
+      <input id="importStateInput" type="file" accept="application/json" class="hidden" />
+    </div>
+
+    <div class="tabRow">
+      <button class="tabBtn active" data-tab="solidpro">SolidPro</button>
+      <button class="tabBtn" data-tab="turning">Drehwerkzeug / Voreinstellung</button>
+      <button class="tabBtn" data-tab="notes">Hinweise</button>
+    </div>
+
+    <section id="tab-solidpro" class="tabContent">
+      <div class="grid">
+        <div class="panel col-6">
+          <h2>SolidPro Schnellrechner</h2>
+          <div class="hint">Für den QR-Code direkt am Werkzeug. Standardmäßig wird der Mittenversatz von <b>26,5 mm</b> verwendet. Das eingegebene Werkzeugmaß wird <b>ab Adapter / ab Mittenversatz</b> erfasst.</div>
+          <div class="fieldGrid" style="margin-top:14px;">
+            <div class="field">
+              <label for="spOffset">Mittenversatz ab VDI-Mitte [mm]</label>
+              <input id="spOffset" type="number" step="0.001" value="26.5" />
+            </div>
+            <div class="field">
+              <label for="spMeasure">Werkzeugmaß ab Adapter [mm]</label>
+              <input id="spMeasure" type="number" step="0.001" value="127.5" />
+            </div>
+            <div class="field full">
+              <label for="spComment">Kommentar / Werkzeug</label>
+              <input id="spComment" type="text" placeholder="z. B. Sauter SolidPro / Bohrstange" />
+            </div>
+          </div>
+        </div>
+
+        <div class="panel col-6">
+          <div class="resultCard">
+            <div class="sectionTitle">Ergebnis</div>
+            <div class="resultMini">SolidPro Position</div>
+            <div id="spResult" class="resultBig">154.000 mm</div>
+            <div id="spFormula" class="resultMini">26.5 + 127.5 = 154.0</div>
+          </div>
+          <div class="okBox">
+            Dieser Bereich ist absichtlich einfach gehalten: <b>Position = Mittenversatz + Werkzeugmaß ab Adapter</b>.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-turning" class="tabContent hidden">
+      <div class="grid">
+        <div class="panel col-7">
+          <h2>Drehwerkzeug / Voreinstellung</h2>
+          <div class="hint">Die Sternrevolver-Logik ist generisch aufgebaut: Werkzeugwerte aus der Voreinstellung werden um den wirksamen Winkel gedreht. Das ist bewusst editierbar, weil Vorzeichen, Nullwinkel und Lage je nach Maschine variieren.</div>
+
+          <div class="sectionTitle" style="margin-top:16px;">Maschine / Layout</div>
+          <div class="fieldGrid">
+            <div class="field">
+              <label for="turretType">Revolvertyp</label>
+              <select id="turretType">
+                <option value="disk">Scheibenrevolver</option>
+                <option value="star">Sternrevolver</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="spindleSide">Spindelseite / Z-Vorzeichen</label>
+              <select id="spindleSide">
+                <option value="main">Hauptspindel (+Z)</option>
+                <option value="counter">Gegenspindel (−Z)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="xMode">X-Ausgabe</label>
+              <select id="xMode">
+                <option value="diameter">X als Durchmesser</option>
+                <option value="radius">X als Radius</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="stationCount">Anzahl Revolverplätze</label>
+              <input id="stationCount" type="number" min="1" step="1" value="12" />
+            </div>
+            <div class="field">
+              <label for="stationNo">Werkzeugplatz / Station</label>
+              <input id="stationNo" type="number" min="1" step="1" value="1" />
+            </div>
+            <div class="field">
+              <label for="zeroAngle">Nullwinkel Platz 1 [°]</label>
+              <input id="zeroAngle" type="number" step="0.001" value="0" />
+            </div>
+            <div class="field">
+              <label for="toolAngle">Zusätzliche Werkzeuglage [°]</label>
+              <input id="toolAngle" type="number" step="0.001" value="0" />
+              <small>z. B. 0 / 90 / 180 / 270 oder frei</small>
+            </div>
+            <div class="field">
+              <label for="manualStepAngle">Platzwinkel manuell [°]</label>
+              <input id="manualStepAngle" type="number" step="0.001" value="30" />
+              <small>Wird bei Sternrevolver genutzt. Standard: 360 / Plätze</small>
+            </div>
+          </div>
+
+          <div class="sectionTitle" style="margin-top:16px;">Basiswerte an der Maschine</div>
+          <div class="fieldGrid">
+            <div class="field">
+              <label for="baseX">VDI-Mitte / Basis X [mm]</label>
+              <input id="baseX" type="number" step="0.001" value="120" />
+            </div>
+            <div class="field">
+              <label for="baseZ">VDI-Mitte / Basis Z [mm]</label>
+              <input id="baseZ" type="number" step="0.001" value="64" />
+            </div>
+            <div class="field">
+              <label for="staticX">Zusatz-Offset X [mm]</label>
+              <input id="staticX" type="number" step="0.001" value="0" />
+            </div>
+            <div class="field">
+              <label for="staticZ">Zusatz-Offset Z [mm]</label>
+              <input id="staticZ" type="number" step="0.001" value="0" />
+            </div>
+          </div>
+
+          <div class="sectionTitle" style="margin-top:16px;">Werte aus der Voreinstellung</div>
+          <div class="fieldGrid">
+            <div class="field">
+              <label for="presetX">Voreinstellung X lokal [mm]</label>
+              <input id="presetX" type="number" step="0.001" value="14.5" />
+              <small>lokaler radialer / querer Wert am Werkzeug</small>
+            </div>
+            <div class="field">
+              <label for="presetZ">Voreinstellung Z lokal [mm]</label>
+              <input id="presetZ" type="number" step="0.001" value="135.888" />
+              <small>lokaler axialer Wert am Werkzeug</small>
+            </div>
+            <div class="field">
+              <label for="swapAxes">Lokalachsen tauschen</label>
+              <select id="swapAxes">
+                <option value="no">Nein</option>
+                <option value="yes">Ja</option>
+              </select>
+              <small>hilfreich, wenn Voreinstellung X/Z anders abgelegt ist</small>
+            </div>
+            <div class="field">
+              <label for="invertLocal">Lokale Vorzeichen</label>
+              <select id="invertLocal">
+                <option value="none">keine Invertierung</option>
+                <option value="x">nur X lokal invertieren</option>
+                <option value="z">nur Z lokal invertieren</option>
+                <option value="both">X und Z lokal invertieren</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel col-5">
+          <h2>Ausgabe</h2>
+          <div class="resultCard">
+            <div class="sectionTitle">Maschinenwerte</div>
+            <div class="kv">
+              <div class="miniBox">
+                <div class="k">X Ergebnis</div>
+                <div id="turnResultX" class="v">211.000</div>
+              </div>
+              <div class="miniBox">
+                <div class="k">Z Ergebnis</div>
+                <div id="turnResultZ" class="v">199.888</div>
+              </div>
+              <div class="miniBox">
+                <div class="k">Wirkwinkel</div>
+                <div id="effectiveAngle" class="v">0.000°</div>
+              </div>
+              <div class="miniBox">
+                <div class="k">Drehanteil</div>
+                <div id="rotationInfo" class="v">ohne</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="turnWarn" class="warnBox">
+            Prüfen: Sternrevolver und Werkzeuglage sind maschinenabhängig. Der Rechner ist absichtlich offen parametrierbar und muss einmal mit realen Referenzwerten plausibilisiert werden.
+          </div>
+
+          <div class="sectionTitle" style="margin-top:14px;">Rechenweg</div>
+          <div id="turnFormula" class="formula"></div>
+        </div>
+
+        <div class="panel col-12">
+          <h3>Optional: SolidPro aus Drehwerkzeugwert ergänzen</h3>
+          <div class="hint">Wenn du vom gleichen QR-Link aus zusätzlich die SolidPro-Position brauchst, kannst du hier das Werkzeugmaß ab Adapter direkt in den Schnellrechner übernehmen.</div>
+          <div class="fieldGrid" style="margin-top:12px;">
+            <div class="field">
+              <label for="transferMeasure">Werkzeugmaß ab Adapter für SolidPro [mm]</label>
+              <input id="transferMeasure" type="number" step="0.001" value="127.5" />
+            </div>
+            <div class="field" style="justify-content:flex-end;">
+              <label>&nbsp;</label>
+              <button id="applyTransferBtn" class="primary">In SolidPro-Rechner übernehmen</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-notes" class="tabContent hidden">
+      <div class="grid">
+        <div class="panel col-12">
+          <h2>Wichtige Hinweise</h2>
+          <ul class="noteList">
+            <li>Die Seite ist bewusst <b>stand-alone</b>. Du kannst sie direkt als <code>index.html</code> in GitHub Pages ablegen.</li>
+            <li>Für <b>Sternrevolver</b> wird der lokale Voreinstellvektor rechnerisch um den wirksamen Winkel gedreht. Das ist eine saubere, aber generische Logik. Exakte Nullwinkel und Vorzeichen müssen zur Maschine passen.</li>
+            <li>Für <b>Scheibenrevolver</b> wird standardmäßig keine stationsabhängige Drehung angewendet. Die Werkzeuglage kann aber zusätzlich über den Winkel vorgegeben werden.</li>
+            <li><b>Hauptspindel</b> und <b>Gegenspindel</b> beeinflussen hier nur das Z-Vorzeichen. Falls deine Maschine anders reagiert, kannst du die Basis- oder Zusatzwerte anpassen.</li>
+            <li>Wenn der Bediener X in <b>Durchmesser</b> eingibt bzw. braucht, wird das Ergebnis automatisch entsprechend ausgegeben.</li>
+            <li>Vor dem produktiven Einsatz mindestens einmal mit einem bekannten Referenzwerkzeug gegenrechnen.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">Index-Datei für GitHub Pages · alles lokal im Browser · keine Bibliotheken erforderlich</div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "qr_code_toolsetter_state_v2";
+
+    const defaults = {
+      spOffset: 26.5,
+      spMeasure: 127.5,
+      spComment: "",
+      turretType: "disk",
+      spindleSide: "main",
+      xMode: "diameter",
+      stationCount: 12,
+      stationNo: 1,
+      zeroAngle: 0,
+      toolAngle: 0,
+      manualStepAngle: 30,
+      baseX: 120,
+      baseZ: 64,
+      staticX: 0,
+      staticZ: 0,
+      presetX: 14.5,
+      presetZ: 135.888,
+      swapAxes: "no",
+      invertLocal: "none",
+      transferMeasure: 127.5
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const fields = [
+      "spOffset","spMeasure","spComment","turretType","spindleSide","xMode","stationCount",
+      "stationNo","zeroAngle","toolAngle","manualStepAngle","baseX","baseZ","staticX",
+      "staticZ","presetX","presetZ","swapAxes","invertLocal","transferMeasure"
+    ];
+
+    function toNum(value, fallback = 0){
+      const n = parseFloat(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function round3(n){ return (Math.round(n * 1000) / 1000).toFixed(3); }
+    function round6(n){ return Math.round(n * 1000000) / 1000000; }
+
+    function degToRad(deg){ return deg * Math.PI / 180; }
+
+    function getState(){
+      const state = {};
+      for(const key of fields){
+        state[key] = $(key).value;
+      }
+      return state;
+    }
+
+    function applyState(state){
+      const merged = {...defaults, ...(state || {})};
+      for(const key of fields){
+        if($(key)) $(key).value = merged[key];
+      }
+    }
+
+    function saveState(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(getState()));
+    }
+
+    function loadState(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return applyState(defaults);
+      try{
+        applyState(JSON.parse(raw));
+      }catch{
+        applyState(defaults);
+      }
+    }
+
+    function computeSolidPro(){
+      const offset = toNum($("spOffset").value, 26.5);
+      const measure = toNum($("spMeasure").value, 0);
+      const result = offset + measure;
+      $("spResult").textContent = `${round3(result)} mm`;
+      $("spFormula").textContent = `${round3(offset)} (Mittenversatz) + ${round3(measure)} (ab Adapter) = ${round3(result)}`;
+      return result;
+    }
+
+    function computeTurning(){
+      const turretType = $("turretType").value;
+      const spindleSide = $("spindleSide").value;
+      const xMode = $("xMode").value;
+
+      const stationCount = Math.max(1, Math.round(toNum($("stationCount").value, 12)));
+      const stationNoRaw = Math.max(1, Math.round(toNum($("stationNo").value, 1)));
+      const stationNo = Math.min(stationCount, stationNoRaw);
+      const zeroAngle = toNum($("zeroAngle").value, 0);
+      const toolAngle = toNum($("toolAngle").value, 0);
+      const manualStepAngle = toNum($("manualStepAngle").value, 360 / stationCount);
+      const autoStepAngle = 360 / stationCount;
+      const stepAngle = turretType === "star" ? manualStepAngle : 0;
+      const stationAngle = turretType === "star" ? (stationNo - 1) * stepAngle : 0;
+      const effectiveAngle = zeroAngle + stationAngle + toolAngle;
+
+      const baseX = toNum($("baseX").value, 0);
+      const baseZ = toNum($("baseZ").value, 0);
+      const staticX = toNum($("staticX").value, 0);
+      const staticZ = toNum($("staticZ").value, 0);
+
+      let localX = toNum($("presetX").value, 0);
+      let localZ = toNum($("presetZ").value, 0);
+
+      if($("swapAxes").value === "yes"){
+        const temp = localX;
+        localX = localZ;
+        localZ = temp;
+      }
+
+      const invert = $("invertLocal").value;
+      if(invert === "x" || invert === "both") localX *= -1;
+      if(invert === "z" || invert === "both") localZ *= -1;
+
+      let rotatedX = localX;
+      let rotatedZ = localZ;
+      let rotationText = "ohne";
+
+      if(turretType === "star"){
+        const rad = degToRad(effectiveAngle);
+        rotatedX = round6(localX * Math.cos(rad) - localZ * Math.sin(rad));
+        rotatedZ = round6(localX * Math.sin(rad) + localZ * Math.cos(rad));
+        rotationText = "gedreht";
+      }else if(turretType === "disk" && toolAngle !== 0){
+        const rad = degToRad(effectiveAngle);
+        rotatedX = round6(localX * Math.cos(rad) - localZ * Math.sin(rad));
+        rotatedZ = round6(localX * Math.sin(rad) + localZ * Math.cos(rad));
+        rotationText = "nur Werkzeuglage";
+      }
+
+      const signZ = spindleSide === "main" ? 1 : -1;
+      const machineRadiusX = baseX + rotatedX + staticX;
+      const machineOutputX = xMode === "diameter" ? machineRadiusX * 2 : machineRadiusX;
+      const machineZ = signZ * (baseZ + rotatedZ + staticZ);
+
+      $("turnResultX").textContent = round3(machineOutputX);
+      $("turnResultZ").textContent = round3(machineZ);
+      $("effectiveAngle").textContent = `${round3(effectiveAngle)}°`;
+      $("rotationInfo").textContent = rotationText;
+
+      const lines = [];
+      lines.push(`Revolvertyp           = ${turretType === "star" ? "Sternrevolver" : "Scheibenrevolver"}`);
+      lines.push(`Plätze                = ${stationCount}`);
+      lines.push(`Auto Platzwinkel      = ${round3(autoStepAngle)}°`);
+      lines.push(`Genutzter Platzwinkel = ${round3(stepAngle)}°`);
+      lines.push(`Station               = ${stationNo}`);
+      lines.push(`Nullwinkel            = ${round3(zeroAngle)}°`);
+      lines.push(`Werkzeuglage          = ${round3(toolAngle)}°`);
+      lines.push(`Wirkwinkel            = ${round3(effectiveAngle)}°`);
+      lines.push(``);
+      lines.push(`Lokal X / Z vor Drehung = ${round3(localX)} / ${round3(localZ)} mm`);
+      lines.push(`Gedrehtes X / Z         = ${round3(rotatedX)} / ${round3(rotatedZ)} mm`);
+      lines.push(`Basis X / Z             = ${round3(baseX)} / ${round3(baseZ)} mm`);
+      lines.push(`Zusatz X / Z            = ${round3(staticX)} / ${round3(staticZ)} mm`);
+      lines.push(`Spindelseite            = ${spindleSide === "main" ? "Hauptspindel (+Z)" : "Gegenspindel (−Z)"}`);
+      lines.push(``);
+      lines.push(`X Radius intern         = BasisX + gedrehtX + ZusatzX`);
+      lines.push(`                       = ${round3(baseX)} + ${round3(rotatedX)} + ${round3(staticX)}`);
+      lines.push(`                       = ${round3(machineRadiusX)} mm`);
+      if(xMode === "diameter"){
+        lines.push(`X Ausgabe               = Radius × 2 = ${round3(machineRadiusX)} × 2 = ${round3(machineOutputX)} mm`);
+      }else{
+        lines.push(`X Ausgabe               = Radius = ${round3(machineOutputX)} mm`);
+      }
+      lines.push(`Z Ausgabe               = Vorzeichen × (BasisZ + gedrehtZ + ZusatzZ)`);
+      lines.push(`                       = ${signZ} × (${round3(baseZ)} + ${round3(rotatedZ)} + ${round3(staticZ)})`);
+      lines.push(`                       = ${round3(machineZ)} mm`);
+
+      $("turnFormula").textContent = lines.join("\n");
+
+      return {
+        machineOutputX,
+        machineZ,
+        effectiveAngle,
+        stationCount,
+        stationNo,
+        turretType,
+        spindleSide,
+        xMode
+      };
+    }
+
+    function computeAll(){
+      computeSolidPro();
+      computeTurning();
+      saveState();
+    }
+
+    function switchTab(name){
+      document.querySelectorAll(".tabBtn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.tab === name);
+      });
+      document.querySelectorAll(".tabContent").forEach(tab => tab.classList.add("hidden"));
+      $(`tab-${name}`).classList.remove("hidden");
+    }
+
+    function resetState(){
+      if(!confirm("Alle lokalen Werte zurücksetzen?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      applyState(defaults);
+      computeAll();
+    }
+
+    async function copySummary(){
+      const solid = computeSolidPro();
+      const turn = computeTurning();
+      const text = [
+        `QR-Code-Toolsetter`,
+        ``,
+        `SolidPro Position: ${round3(solid)} mm`,
+        `Mittenversatz: ${round3(toNum($("spOffset").value))} mm`,
+        `Werkzeugmaß ab Adapter: ${round3(toNum($("spMeasure").value))} mm`,
+        ``,
+        `Drehwerkzeug`,
+        `Revolvertyp: ${turn.turretType === "star" ? "Sternrevolver" : "Scheibenrevolver"}`,
+        `Station: ${turn.stationNo}/${turn.stationCount}`,
+        `X: ${round3(turn.machineOutputX)} mm`,
+        `Z: ${round3(turn.machineZ)} mm`,
+        `Wirkwinkel: ${round3(turn.effectiveAngle)}°`,
+        `X-Modus: ${turn.xMode === "diameter" ? "Durchmesser" : "Radius"}`
+      ].join("\n");
+
+      try{
+        await navigator.clipboard.writeText(text);
+        alert("Zusammenfassung in die Zwischenablage kopiert.");
+      }catch{
+        alert("Kopieren wurde vom Browser nicht erlaubt.");
+      }
+    }
+
+    function exportState(){
+      const blob = new Blob([JSON.stringify(getState(), null, 2)], {type:"application/json"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "qr-code-toolsetter-config.json";
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+
+    function importStateFile(file){
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try{
+          const obj = JSON.parse(String(reader.result || "{}"));
+          applyState(obj);
+          computeAll();
+          alert("JSON erfolgreich importiert.");
+        }catch{
+          alert("JSON konnte nicht gelesen werden.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function wire(){
+      loadState();
+
+      fields.forEach(id => {
+        $(id).addEventListener("input", computeAll);
+        $(id).addEventListener("change", computeAll);
+      });
+
+      document.querySelectorAll(".tabBtn").forEach(btn => {
+        btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+      });
+
+      $("saveStateBtn").addEventListener("click", () => {
+        saveState();
+        alert("Einstellungen lokal gespeichert.");
+      });
+      $("resetStateBtn").addEventListener("click", resetState);
+      $("copySummaryBtn").addEventListener("click", copySummary);
+      $("exportStateBtn").addEventListener("click", exportState);
+      $("importStateTriggerBtn").addEventListener("click", () => $("importStateInput").click());
+      $("importStateInput").addEventListener("change", (e) => {
+        importStateFile(e.target.files && e.target.files[0]);
+        e.target.value = "";
+      });
+
+      $("applyTransferBtn").addEventListener("click", () => {
+        $("spMeasure").value = $("transferMeasure").value;
+        computeAll();
+        switchTab("solidpro");
+      });
+
+      $("turretType").addEventListener("change", () => {
+        const turret = $("turretType").value;
+        if(turret === "star"){
+          const count = Math.max(1, Math.round(toNum($("stationCount").value, 12)));
+          $("manualStepAngle").value = round3(360 / count);
+        }
+        computeAll();
+      });
+
+      $("stationCount").addEventListener("change", () => {
+        const count = Math.max(1, Math.round(toNum($("stationCount").value, 12)));
+        if($("turretType").value === "star"){
+          $("manualStepAngle").value = round3(360 / count);
+        }
+        computeAll();
+      });
+
+      computeAll();
+    }
+
+    window.addEventListener("DOMContentLoaded", wire);
+  </script>
+</body>
+</html>
